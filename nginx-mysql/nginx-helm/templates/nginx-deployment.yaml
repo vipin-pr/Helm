@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: {{ .Values.nginx_values.kind }}
+metadata:
+  name: {{ .Values.nginx_values.name }}
+spec:
+  replicas: {{ .Values.nginx_values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.nginx_values.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.nginx_values.app }}
+    spec:
+      containers:
+      - name: {{ .Values.nginx_values.name }}
+        image: {{ .Values.nginx_values.image }}:{{ .Values.nginx_values.tag }}
+
+        ports:
+        - containerPort: {{ .Values.nginx_values.containerPort }}
+
+        volumeMounts:
+        {{- with .Values.nginx_values.volume_mounts }}
+        {{- range . }}
+        - name: {{ .name }}
+          mountPath: {{ .mountPath }}
+        {{- end }}
+        {{- end }}
+
+        resources:
+          {{- with .Values.nginx_values.resources }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+
+      volumes:
+      - name: {{ .Values.nginx_values.volumes.html_volume.name}}
+        configMap:
+          name: {{ .Values.nginx_values.volumes.html_volume.configMap.name}}
+      - name: {{ .Values.nginx_values.volumes.config_volume.name }}
+        configMap:
+          name: {{ .Values.nginx_values.volumes.config_volume.configMap.name }}
+
+
+
+      
+  

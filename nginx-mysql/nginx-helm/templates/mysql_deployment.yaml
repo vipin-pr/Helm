@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: {{ .Values.mysql_values.kind }}
+metadata:
+  name: {{ .Values.mysql_values.name }}
+spec:
+  replicas: {{ .Values.mysql_values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.mysql_values.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mysql_values.app }}
+    spec:
+      containers:
+      - name: {{ .Values.mysql_values.app }}
+        image: {{ .Values.mysql_values.image }}:{{ .Values.mysql_values.tag }}
+
+        ports:
+        - containerPort: {{ .Values.mysql_values.containerPort }}
+
+        env:
+        {{- with .Values.mysql_values.env }}
+        {{- range . }}
+        - name: {{ .name }}
+          value: {{ .value }}
+        {{- end }}
+        {{- end }}
+
+        resources:
+        {{- with .Values.mysql_values.resources }}
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+
+        volumeMounts:
+        - name: {{ .Values.mysql_values.volumeMounts.name }}
+          mountPath: {{ .Values.mysql_values.volumeMounts.mountPath }}
+
+      volumes:
+      - name: {{ .Values.mysql_values.volumes.name }}
+        emptyDir: {}
+

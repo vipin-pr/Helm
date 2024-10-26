@@ -1,0 +1,105 @@
+#values for nginx-deployment
+nginx_values:
+  kind: Deployment
+  name: nginx-deployment
+  replicas: 1
+  app: nginx
+  image: nginx
+  tag: latest
+  containerPort: 80
+
+  volume_mounts:
+  - name: html-volume
+    mountPath: /usr/share/nginx/html
+  - name: config-volume
+    mountPath: /etc/nginx/conf.d
+
+  volumes:
+    html_volume:
+      name: html-volume
+      configMap:
+        name: index-html
+
+    config_volume:
+      name: config-volume
+      configMap:
+        name: nginx-config
+
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 250m
+    limits:
+      memory: 128Mi
+      cpu: 500m
+
+  service:
+    name: nginx-service
+    app: nginx
+    ports:
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      type: ClusterIP
+
+  configMap:
+    name: nginx-config
+    data:
+      default_conf: |
+        server {
+            listen 80;
+            location / {
+                root /usr/share/nginx/html;
+                index index.html index.htm;
+            }
+        }
+
+
+
+#values for mysql-deployment
+mysql_values:
+  kind: Deployment
+  name: mysql-deployment
+  replicas: 1
+  app: mysql
+  image: mysql
+  tag: 5.7
+  containerPort: 3306
+
+  env:
+  - name: MYSQL_ROOT_PASSWORD
+    value: "rootpassword"
+  - name: MYSQL_DATABASE
+    value: "mydatabase"
+  - name: MYSQL_USER
+    value: "myuser"
+  - name: MYSQL_PASSWORD
+    value: "mypassword"
+
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "250m"
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+
+  volumeMounts:
+    name: mysql-data
+    mountPath: /var/lib/mysql
+
+  volumes:
+    name: mysql-data
+
+  service:
+    name: mysql-service
+    app: mysql
+    ports:
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+      type: ClusterIP
+
+
+
+
